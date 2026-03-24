@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Primary (versión suavizada del naranja) -->
+    <color name="md_primary">#FDBA74</color> <!-- orange-300 -->
+    <color name="md_onPrimary">#7C2D12</color>
+
+    <!-- Secondary -->
+    <color name="md_secondary">#FED7AA</color>
+    <color name="md_onSecondary">#7C2D12</color>
+
+    <!-- Superficies -->
+    <color name="md_surface">#121212</color>
+    <color name="md_onSurface">#E6E1E5</color>
+
+</resources>

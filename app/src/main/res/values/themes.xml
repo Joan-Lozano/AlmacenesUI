@@ -1,0 +1,25 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Base.Theme.AlmacenesUI" parent="Theme.Material3.DayNight.NoActionBar">
+
+        <item name="colorPrimary">@color/md_primary</item>
+        <item name="colorOnPrimary">@color/md_onPrimary</item>
+
+        <item name="colorSecondary">@color/md_secondary</item>
+        <item name="colorOnSecondary">@color/md_onSecondary</item>
+
+        <item name="colorSurface">@color/md_surface</item>
+        <item name="colorOnSurface">@color/md_onSurface</item>
+
+        <!-- Compatibilidad con componentes antiguos -->
+        <item name="colorPrimaryVariant">@color/md_secondary</item>
+        <item name="colorSecondaryVariant">@color/md_secondary</item>
+
+        <item name="android:statusBarColor">?attr/colorSurface</item>
+        <item name="android:windowLightStatusBar">true</item>
+
+    </style>
+
+    <style name="Theme.AlmacenesUI" parent="Base.Theme.AlmacenesUI" />
+
+</resources>

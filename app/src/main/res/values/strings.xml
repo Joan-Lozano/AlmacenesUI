@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">AlmacenesUI</string>
+    <string name="activar_teclado_en_pantalla">Activar teclado en pantalla</string>
+    <string name="https_app_campestre_com">https://app.campestre.com</string>
+    <string name="abrir_aplicacion">Abrir aplicación</string>
+    <string name="cerrar_app">Cerrar app</string>
+    <string name="logo">Logo</string>
+</resources>

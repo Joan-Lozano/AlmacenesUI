@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tailwind Orange 500: #F97316 -->
+    <color name="orange_500">#F97316</color>
+    <color name="orange_600">#EA580C</color>
+    <color name="orange_700">#C2410C</color>
+
+    <!-- Primary -->
+    <color name="md_primary">@color/orange_500</color>
+    <color name="md_onPrimary">#FFFFFF</color>
+    <color name="md_primaryContainer">#FFEDD5</color>
+    <color name="md_onPrimaryContainer">#7C2D12</color>
+
+    <!-- Secondary -->
+    <color name="md_secondary">@color/orange_700</color>
+    <color name="md_onSecondary">#FFFFFF</color>
+
+    <!-- Surfaces -->
+    <color name="md_surface">#FFFFFF</color>
+    <color name="md_onSurface">#1C1B1F</color>
+    <color name="md_outline">@color/orange_500</color>
+</resources>
