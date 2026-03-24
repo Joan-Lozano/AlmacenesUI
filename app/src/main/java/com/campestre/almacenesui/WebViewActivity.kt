@@ -1,6 +1,10 @@
 package com.campestre.almacenesui
 
 import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.net.http.SslError
 import android.os.Build
 import android.os.Bundle
@@ -13,11 +17,44 @@ import android.webkit.SslErrorHandler
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 
 class WebViewActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
+
+    // Constantes para Zebra DataWedge
+    private val scannedDataAction = "com.campestre.almacenesui.SCAN_ACTION"
+    private val datawedgeIntentKey = "com.symbol.datawedge.data_string"
+
+    private val scanReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == scannedDataAction) {
+                val scannedData = intent.getStringExtra(datawedgeIntentKey)
+                scannedData?.let { data ->
+                    val js = """
+                        (function() {
+                            var element = document.activeElement;
+                            if (element && (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA' || element.isContentEditable)) {
+                                var nativeValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set;
+                                if (nativeValueSetter) {
+                                    nativeValueSetter.call(element, '$data');
+                                } else {
+                                    element.value = '$data';
+                                }
+                                element.dispatchEvent(new Event('input', { bubbles: true }));
+                                element.dispatchEvent(new Event('change', { bubbles: true }));
+                                element.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Enter', keyCode: 13 }));
+                            }
+                        })();
+                    """.trimIndent()
+                    webView.evaluateJavascript(js, null)
+                }
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,12 +69,46 @@ class WebViewActivity : AppCompatActivity() {
 
         setupWebView()
 
-        // Desactivar teclado virtual por completo si el switch está en false
         if (!enableKeyboard) {
             window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
         }
 
+        // Manejo moderno del botón atrás (reemplaza a onBackPressed)
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (webView.canGoBack()) {
+                    webView.goBack()
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        })
+
         webView.loadUrl(url)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val filter = IntentFilter(scannedDataAction)
+        filter.addCategory(Intent.CATEGORY_DEFAULT)
+        
+        // Se usa siempre el flag RECEIVER_EXPORTED para permitir que DataWedge envíe datos a la app
+        ContextCompat.registerReceiver(
+            this, 
+            scanReceiver, 
+            filter, 
+            ContextCompat.RECEIVER_EXPORTED
+        )
+    }
+
+    override fun onPause() {
+        super.onPause()
+        try {
+            unregisterReceiver(scanReceiver)
+        } catch (e: Exception) {
+            // Ignorar
+        }
     }
 
     private fun setupFullScreen() {
@@ -62,7 +133,6 @@ class WebViewActivity : AppCompatActivity() {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView() {
-        // 1. Configurar Cookies (Vital para sesiones de Axios)
         val cookieManager = CookieManager.getInstance()
         cookieManager.setAcceptCookie(true)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -70,18 +140,8 @@ class WebViewActivity : AppCompatActivity() {
         }
 
         webView.webViewClient = object : WebViewClient() {
-            override fun onReceivedSslError(
-                view: WebView?,
-                handler: SslErrorHandler?,
-                error: SslError?
-            ) {
-                // Proceder incluso con errores de certificado para que Axios no aborte
+            override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
                 handler?.proceed()
-            }
-
-            @Deprecated("Deprecated in Java")
-            override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
-                return false
             }
         }
 
@@ -95,14 +155,11 @@ class WebViewActivity : AppCompatActivity() {
             useWideViewPort = true
             javaScriptCanOpenWindowsAutomatically = true
             
-            // 2. Permitir contenido mixto (HTTP con HTTPS)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
             }
             
-            // 3. User Agent moderno para compatibilidad
             userAgentString = "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
-            
             cacheMode = WebSettings.LOAD_DEFAULT
         }
     }
@@ -111,14 +168,6 @@ class WebViewActivity : AppCompatActivity() {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) {
             setupFullScreen()
-        }
-    }
-
-    override fun onBackPressed() {
-        if (webView.canGoBack()) {
-            webView.goBack()
-        } else {
-            super.onBackPressed()
         }
     }
 }
