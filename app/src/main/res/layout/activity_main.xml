@@ -40,7 +40,8 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/https_app_campestre_com"
+                android:hint="@string/ingresa_la_url"
+                app:placeholderText="@string/https_app_campestre_com"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
                 <com.google.android.material.textfield.TextInputEditText
